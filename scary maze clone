@@ -1,0 +1,206 @@
+import pygame, sys
+from pygame.locals import *
+from os import path
+pygame.init()
+
+screenwidth = 1200
+screenheight = 650
+
+game_over = False
+
+GREEN = (0,255,0)
+BLACK = (0,0,0)
+TURKEY = (0,255,255)
+WHITE = (255,255,255)
+RED = (255,0,0)
+
+clock = pygame.time.Clock()
+
+screen = pygame.display.set_mode((screenwidth, screenheight))
+pygame.display.set_caption("xd")
+
+scare_face = pygame.image.load(path.join("graphics", "scare image.png")).convert()
+scare_face_scaled = pygame.transform.scale(scare_face, (screenwidth, screenheight))
+
+end_game_sound = pygame.mixer.Sound(path.join("sounds", "Scary Maze Game Face and Sound 1 (mp3cut.net).wav"))
+end_game_flag = True
+
+
+class Mouse(pygame.sprite.Sprite):   
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        pygame.mouse.set_pos(60,560)
+        self.width = 5
+        self.height = self.width
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        
+    def update(self):
+        if pygame.mouse.get_focused():
+            self.rect.center = pygame.mouse.get_pos()
+
+    
+        
+        
+        
+class Walls(pygame.sprite.Sprite):
+    def __init__(self, startx, starty, width, height):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = width
+        self.height = height
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = startx
+        self.rect.y = starty
+
+class Endwall(pygame.sprite.Sprite):
+    def __init__(self, startx, starty, width, height):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = width
+        self.height = height
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.x = startx
+        self.rect.y = starty
+    
+class Obstacles_updown(pygame.sprite.Sprite):
+    def __init__(self, startx, starty):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = 20
+        self.height = 20
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = startx
+        self.rect.y = starty
+        self.vely = 1
+        
+    def update(self):
+        self.rect.y += self.vely
+        collision = pygame.sprite.spritecollide(self, wall_sprites, False)
+        if collision:
+            self.vely = self.vely * -1
+
+class Obstacles_rightleft(pygame.sprite.Sprite):
+    def __init__(self, startx, starty):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = 20
+        self.height = 20
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = startx
+        self.rect.y = starty
+        self.velx = 1
+        
+    def update(self):
+        self.rect.x += self.velx
+        collision = pygame.sprite.spritecollide(self, wall_sprites, False)
+        if collision:
+            self.velx = self.velx * -1
+            
+        
+    
+        
+
+
+wall_sprites = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
+obstacle_sprites = pygame.sprite.Group()
+
+w1 = Walls(0,0,40,540)
+w2 = Walls(0,590,screenwidth,60)
+w3 = Walls(40,0,80,540)
+w4 = Walls(120,0,80,200)
+w5 = Walls(200,0,40,230)
+w6 = Walls(240,200,25,30)
+w7 = Walls(180,245,100,screenheight)
+w8 = Walls(280,55,30,screenheight)
+w9 = Walls(0,0,screenwidth,30)
+w10 = Walls(330,0,50,520)
+w11 = Walls(330,490,350,30)
+w12 = Walls(380,0,30,290)
+w13 = Walls(380,0,45,275)
+w14 = Walls(380,0,60,260)
+w15 = Walls(380,0,75,245)
+w16 = Walls(380,0,90,230)
+w17 = Walls(410,305,150,170)
+w18 = Walls(425,290,135,155)
+w19 = Walls(440,275,120,140)
+w20 = Walls(455,260,105,135)
+w21 = Walls(490,50,210,425)
+w22 = Walls(700,230,20,80)
+w23 = Walls(700,450,screenwidth,25)
+w24 = Walls(740,475,screenwidth,screenheight)
+w25 = Walls(740,0,300,430)
+w26 = Walls(1180,0,20,screenheight)
+
+
+endwall = Endwall(1040,30,160,30)
+
+obstacley1 = Obstacles_updown(340, 520)
+obstacley2 = Obstacles_updown(380, 570)
+obstacley3 = Obstacles_updown(420, 520)
+obstacley4 = Obstacles_updown(460, 570)
+obstacley5 = Obstacles_updown(500, 520)
+obstacley6 = Obstacles_updown(540, 570)
+obstacley7 = Obstacles_updown(580, 520)
+obstacley8 = Obstacles_updown(620, 570)
+obstacley9 = Obstacles_updown(660, 520)
+
+obstaclex1 = Obstacles_rightleft(1040,130)
+obstaclex2 = Obstacles_rightleft(1160,170)
+obstaclex3 = Obstacles_rightleft(1040, 210)
+obstaclex4 = Obstacles_rightleft(1160, 250)
+obstaclex5 = Obstacles_rightleft(1040, 290)
+obstaclex6 = Obstacles_rightleft(1160, 330)
+obstaclex7 = Obstacles_rightleft(1040, 370)
+obstaclex8 = Obstacles_rightleft(1160, 410)
+obstaclex9 = Obstacles_rightleft(1040, 450)
+
+mouse = Mouse()
+
+obstacle_sprites.add(obstaclex1, obstaclex2, obstaclex3, obstaclex4, obstaclex5, obstaclex5, obstaclex6, obstaclex7, obstaclex8, obstaclex9, obstacley1, obstacley2, obstacley3, obstacley4, obstacley5, obstacley6, obstacley7, obstacley8, obstacley9)
+wall_sprites.add(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15, w16, w17, w18, w19, w20, w21, w22, w23, w24, w25, w26)
+all_sprites.add(mouse, endwall, obstaclex1, obstaclex2, obstaclex3, obstaclex4, obstaclex5, obstaclex5, obstaclex6, obstaclex7, obstaclex8, obstaclex9, obstacley1, obstacley2, obstacley3, obstacley4, obstacley5,  obstacley6, obstacley7, obstacley8, obstacley9, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15, w16, w17, w18, w19, w20, w21, w22, w23, w24, w25, w26)
+
+
+def game_end(text):
+    global end_game_flag
+    if game_over:
+        if end_game_flag:
+            end_game_sound.play()
+            end_game_flag = False
+        screen.blit(scare_face_scaled, (0,0))
+def checkCollision(sprite1, sprite2):
+    col = pygame.sprite.spritecollide(sprite1, sprite2, False)
+    global game_over
+    if col:
+        game_over = True
+        all_sprites.remove(mouse, wall_sprites, obstacle_sprites, endwall)
+
+def mouseicon():
+    if game_over == True:
+        pygame.mouse.set_visible(True)
+    elif game_over == False:
+        pygame.mouse.set_visible(False)
+
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+            
+    screen.fill(TURKEY)        
+    all_sprites.update()
+    all_sprites.draw(screen)
+    mouseicon()
+    checkCollision(mouse, wall_sprites)
+    checkCollision(mouse, obstacle_sprites)
+    game_end("GAME OVER")
+    pygame.display.flip()
+    clock.tick(60)
