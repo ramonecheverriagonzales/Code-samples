@@ -1,0 +1,163 @@
+import pygame, sys
+import random
+from os import path
+from pygame.locals import *
+pygame.init()
+
+screenwidth = 1200
+screenheight = 650
+
+screen = pygame.display.set_mode((screenwidth,screenheight))
+pygame.display.set_caption("slime monster")
+
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+BLUE = (0,0,128)
+GREEN = (0,255,0)
+RED = (255,0,0)
+
+score_points = 0
+points = 1
+game_over = False
+
+clock = pygame.time.Clock()
+
+class Blocks(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = random.randrange(50, 120)
+        self.height = self.width
+        self.velx = random.randrange(1,5)
+        self.vely = random.randrange(-1,1)
+        self.startpoint = 2000
+        self.image = pygame.image.load(path.join("graphics", "b30010.png")).convert()
+        self.image.set_colorkey(BLACK)
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        self.rect = self.image.get_rect()
+        self.radius = self.width//3
+        self.rect.x = random.randrange(screenwidth, screenwidth + self.startpoint)
+        self.rect.y = random.randrange(0, screenheight)
+    
+    def update(self):
+        self.rect.x += -self.velx
+        self.rect.y += self.vely
+        if self.rect.right < 0 or self.rect.top < 0 or self.rect.bottom > screenheight:
+            self.rect.x = random.randrange(screenwidth, screenwidth + self.startpoint)
+            self.rect.y = self.rect.y = random.randrange(0, screenheight)
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = 150
+        self.height = 150
+        self.vel = 3
+        self.image = pygame.image.load(path.join("graphics", "onlyrocket.png")).convert()
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.radius = 20
+        self.rect.x = 0
+        self.rect.y = screenheight / 2
+    
+    def update(self):
+        keystate = pygame.key.get_pressed()
+        if keystate[K_UP]:
+            self.rect.y += -self.vel
+        if keystate[K_DOWN]:
+            self.rect.y += self.vel
+        if keystate[K_LEFT]:
+            self.rect.x += -self.vel
+        if keystate[K_RIGHT]:
+            self.rect.x += self.vel
+         #sprite collision against left wall   
+        if self.rect.left < 0 - (self.width/2 - self.radius):
+            self.rect.left = 0 - (self.width/2 - self.radius)
+        #sprite collision against right wall
+        if self.rect.right > screenwidth + (self.width/2 - self.radius):
+            self.rect.right = screenwidth + (self.width/2 - self.radius)                                  
+        #sprite collision against top wall
+        if self.rect.top < 0 - (self.height/2 - self.radius):
+            self.rect.top = 0 - (self.height/2 - self.radius)
+        #sprite collision against bottom wall
+        if self.rect.bottom > screenheight + (self.height/2 - self.radius):
+            self.rect.bottom =  screenheight + (self.height/2 - self.radius)
+    
+            
+def transformimage(image, scalex, scaley):
+    image = pygame.transform.scale(image, (scalex, scaley))
+    return image
+    
+background = pygame.image.load(path.join("graphics", "space1.png")).convert()
+backgroundscaled = transformimage(background, screenwidth, screenheight)
+backgroundscaled_rect = background.get_rect()
+
+all_sprites = pygame.sprite.Group()
+block_sprites = pygame.sprite.Group()
+player_sprites = pygame.sprite.Group()
+
+player = Player()
+
+player_sprites.add(player)
+all_sprites.add(player)
+
+for i in range(40):
+    block = Blocks()
+    block_sprites.add(block)
+    all_sprites.add(block)
+def levels(score):
+    if 2000 < score < 2025:
+        for c in range(1):
+            block = Blocks()
+            block_sprites.add(block)
+            all_sprites.add(block)
+        
+        
+    
+    
+
+        
+    
+def gameover(message):
+    if game_over == True:
+        font = pygame.font.Font(None, screenwidth//6)
+        text = font.render(message, True, (WHITE))
+        screen.blit(text, (screenwidth/2 - screenwidth/3, screenheight/2.5))
+    
+def scoremessage():
+    global score_points
+    score_points += points
+    font = pygame.font.Font(None, 50)
+    text = font.render(str(score_points), True, (WHITE))
+    screen.blit(text, (screenwidth/2 - screenwidth/45, 2))
+
+def checkCollision(sprite1, sprite2):
+    collision = pygame.sprite.spritecollide(sprite1, sprite2, True, pygame.sprite.collide_circle)
+    if collision:
+        global points
+        global game_over
+        game_over = True
+        points = 0
+        all_sprites.remove(player, block_sprites)
+        
+
+
+while True:
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+            
+    screen.blit(backgroundscaled, backgroundscaled_rect)
+    all_sprites.update()
+    all_sprites.draw(screen)
+    
+    checkCollision(player, block_sprites)  
+    scoremessage()
+    gameover("GAME OVER")
+    levels(score_points)
+    
+    pygame.display.flip()
+    
+    clock.tick(140)
