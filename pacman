@@ -1,0 +1,224 @@
+import pygame, sys 
+from pygame.locals import * 
+pygame.init()
+
+screenwidth = 1200
+screenheight = 700
+
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+BLUE = (0,0,255)
+GREEN = (0,255,0)
+
+game_over = False
+
+block_size = 30
+
+clock = pygame.time.Clock()
+dt = clock.tick(120)
+
+speed = 0.5
+
+screen = pygame.display.set_mode((screenwidth, screenheight))
+pygame.display.set_caption("xd")
+
+class Maze(pygame.sprite.Sprite):
+    def __init__(self, startx, starty, width, height):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = width
+        self.height = height
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.x = startx
+        self.rect.y = starty
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = block_size
+        self.height = block_size
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (100,100)
+    def update(self):
+        self.speedx = 0
+        self.speedy = 0
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_LEFT]:
+            self.speedx = -speed * dt
+        if keystate[pygame.K_RIGHT]:
+            self.speedx = speed * dt
+        if keystate[pygame.K_UP]:
+            self.speedy = -speed * dt
+        if keystate[pygame.K_DOWN]:
+            self.speedy = speed * dt
+        
+        if self.rect.left > screenwidth:
+            self.rect.right = 0
+        if self.rect.right < 0:
+            self.rect.right = screenwidth
+        if self.rect.bottom < 0:
+            self.rect.top = screenheight
+        if self.rect.top > screenheight:
+            self.rect.top = screenheight
+    
+    def collide(self, walls):
+        
+        self.rect.x += self.speedx
+        
+        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
+        for block in block_hit_list:
+            if self.speedx > 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+                
+        self.rect.y += self.speedy
+                
+        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
+        for block in block_hit_list:
+            if self.speedy > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
+               
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = block_size
+        self.height = block_size
+        self.image = pygame.Surface((self.width, self.height))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.rect.center = (600,500)
+    def update(self):
+        self.speedx = 0
+        self.speedy = 0
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_a]:
+            self.speedx = -speed * dt
+        if keystate[pygame.K_d]:
+            self.speedx = speed * dt
+        if keystate[pygame.K_w]:
+            self.speedy = -speed * dt
+        if keystate[pygame.K_s]:
+            self.speedy = speed * dt
+        
+        if self.rect.left > screenwidth:
+            self.rect.right = 0
+        if self.rect.right < 0:
+            self.rect.right = screenwidth
+        if self.rect.bottom < 0:
+            self.rect.top = screenheight
+        if self.rect.top > screenheight:
+            self.rect.top = screenheight
+            
+    def collide(self, walls):
+        
+        self.rect.x += self.speedx
+        
+        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
+        for block in block_hit_list:
+            if self.speedx > 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+                
+        self.rect.y += self.speedy
+                
+        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
+        for block in block_hit_list:
+            if self.speedy > 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
+     
+
+maze_sprites = pygame.sprite.Group()
+block_sprites = pygame.sprite.Group()
+enemy_sprites = pygame.sprite.Group()
+player_sprites = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
+
+player = Player()
+player_sprites.add(player)
+
+enemy = Enemy()
+enemy_sprites.add(enemy)
+#default screen dimensions : 1200 * 700
+#lines dimensions : 30 width
+#start x, start y, width, height
+l1 = Maze(0, 0, 15, 250)
+l2 = Maze(0,450,15,250)
+l3 = Maze(15,220,150,30)
+l4 = Maze(15,450,150,30)
+l5 = Maze(150, 220,30,60)
+l6 = Maze(150, 410,30,70)
+l7 = Maze(0,280,180,30)
+l8 = Maze(0,380,180,30)
+l9 = Maze(100,60,120,30)
+l10 = Maze(100,150,120,15)
+l12 = Maze(100,540,120,30)
+l13 = Maze(190,570,30,60)
+l14 = Maze(0,0,1200,15)
+l15 = Maze(0,685,1200,15)
+l16 = Maze(280,60,150,30)
+l17 = Maze(280,150,30,160)
+l18 = Maze(310,215,150,30)
+l19 = Maze(280,380,30,100)
+l20 = Maze(280,540,180,30)
+l22 = Maze(585, 0, 30, 90)
+l23 = Maze(400,150,400,30)
+l24 = Maze(585,180,30,65)
+l33 = Maze(770,60,150,30)
+l34 = Maze(890,150,30,160)
+l35 = Maze(740,215,150,30)
+l36 = Maze(890,380,30,100)
+l37 = Maze(740,540,180,30)
+l39 = Maze(980,60,120,30)
+l40 = Maze(980,150,120,15)
+l41 = Maze(1025,220,150,30)
+l43 = Maze()
+
+maze_sprites.add(l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l12, l13, l14, l15, l16, l17, l18, l19, l20, l22, l23, l24, l33, l34, l35, l36, l37, l39, l40)
+all_sprites.add(l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l12, l13, l14, l15, l16, l17, l18, l19, l20, l22, l23, l24, l33, l34, l35, l36, l37, l39, l40, l41)
+
+block_sprites.add(player, enemy)
+all_sprites.add(block_sprites)
+
+       
+def gameover(message):
+    global game_over
+    if game_over == True:
+        all_sprites.remove(maze_sprites, block_sprites)
+        font = pygame.font.Font(None, screenwidth//6)
+        text = font.render(message, True, (WHITE))
+        screen.blit(text, (screenwidth/2 - screenwidth/3, screenheight/2.5))
+    
+def checkCollision(sprite1, sprite2):
+    collision = pygame.sprite.spritecollide(sprite1, sprite2, False)
+    if collision:
+        global game_over
+        game_over = True
+    
+ 
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    screen.fill(BLACK)
+    all_sprites.update()
+    all_sprites.draw(screen)
+    enemy.collide(maze_sprites)
+    player.collide(maze_sprites)
+    checkCollision(player, enemy_sprites)
+    gameover("GAME OVER")
+    
+    
+    pygame.display.flip()
+    clock.tick(120)        
